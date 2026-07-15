@@ -8,7 +8,7 @@ info:
 servers:
   - url: http://localhost:3000
     description: Serveur de développement
-  - url: https://api-finder-service.onrender.com
+  - url: https://play-move-1.onrender.com
     description: Serveur de production
 
 paths:

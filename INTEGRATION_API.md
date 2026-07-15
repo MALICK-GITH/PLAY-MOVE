@@ -201,7 +201,7 @@ const PROXY_URL = 'http://votre-proxy:port';
 
 Le service est configuré pour Render avec `render.yaml`.
 
-URL de production: `https://api-finder-service.onrender.com`
+URL de production: `https://play-move-1.onrender.com`
 
 ### Docker
 
