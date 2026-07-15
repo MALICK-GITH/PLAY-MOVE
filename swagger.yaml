@@ -1,0 +1,145 @@
+openapi: 3.0.0
+info:
+  title: API Finder Service
+  description: Service d'analyse pour capturer les appels API d'une page web
+  version: 1.0.0
+  contact:
+    name: API Support
+servers:
+  - url: http://localhost:3000
+    description: Serveur de développement
+  - url: https://api-finder-service.onrender.com
+    description: Serveur de production
+
+paths:
+  /:
+    get:
+      summary: Health check
+      description: Vérifie si le service fonctionne
+      responses:
+        '200':
+          description: Service opérationnel
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: API Finder Service — OK
+
+  /analyze:
+    post:
+      summary: Analyser les appels API d'une page
+      description: |
+        Lance un navigateur headless pour capturer tous les appels API (XHR/Fetch) 
+        effectués par une page web donnée. Les requêtes passent par un proxy interne.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: URL de la page à analyser
+                  example: https://example.com
+      responses:
+        '200':
+          description: Analyse réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  source:
+                    type: string
+                    description: URL analysée
+                  count:
+                    type: integer
+                    description: Nombre de requêtes capturées
+                  requests:
+                    type: array
+                    description: Liste des requêtes API capturées
+                    items:
+                      type: object
+                      properties:
+                        method:
+                          type: string
+                          description: Méthode HTTP (GET, POST, etc.)
+                        url:
+                          type: string
+                          description: URL de la requête
+                        headers:
+                          type: object
+                          description: Headers de la requête (sanitisés)
+                        postData:
+                          type: string
+                          nullable: true
+                          description: Corps de la requête (sanitisé)
+                        responsePreview:
+                          type: string
+                          nullable: true
+                          description: Preview de la réponse
+                        status:
+                          type: integer
+                          nullable: true
+                          description: Code de statut HTTP
+        '400':
+          description: Erreur de validation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Message d'erreur
+              examples:
+                url_manquante:
+                  value:
+                    error: URL manquante ou invalide
+                url_malformee:
+                  value:
+                    error: URL malformée
+                schema_non_autorise:
+                  value:
+                    error: Schéma non autorisé (seulement http/https)
+                ip_privee:
+                  value:
+                    error: Cible non autorisée (IP privée ou loopback)
+        '429':
+          description: Trop de requêtes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Trop de requêtes, réessaie dans une minute.
+        '500':
+          description: Erreur interne du serveur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Échec de l'analyse
+                  detail:
+                    type: string
+                    description: Détails de l'erreur
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Clé API pour l'authentification (optionnel)
+
+security:
+  - ApiKeyAuth: []

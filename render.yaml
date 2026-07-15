@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: api-finder-service
+    env: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
